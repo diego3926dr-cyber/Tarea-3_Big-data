@@ -1,0 +1,220 @@
+
+==============================================================================
+PASO 1 - DIRECTORIO DE SALIDA
+==============================================================================
+Carpeta : /home/vboxuser/Escritorio/BIGDATA 3/fase1_drogas
+Graficos: /home/vboxuser/Escritorio/BIGDATA 3/fase1_drogas/graficos
+
+Dataset: /home/vboxuser/Descargas/DESTRUCCION_DE_INFRAESTRUCTURA_DE_PRODUCCION_DE_DROGAS_ILICITAS_20261015.csv
+Tamano : 2,940,966 bytes
+
+==============================================================================
+PASO 2a - CARGA Y ESQUEMA
+==============================================================================
+df.count() : 37,987
+Columnas   : 7
+
+printSchema():
+root
+ |-- FECHA HECHO: string (nullable = true)
+ |-- COD_DEPTO: string (nullable = true)
+ |-- DEPARTAMENTO: string (nullable = true)
+ |-- COD_MUNI: string (nullable = true)
+ |-- MUNICIPIO: string (nullable = true)
+ |-- CANTIDAD: integer (nullable = true)
+ |-- UNIDAD DE MEDIDA: string (nullable = true)
+
+
+==============================================================================
+PASO 2b - LIMPIEZA
+==============================================================================
+Columnas renormal: ['fecha', 'cod_depto', 'departamento', 'cod_muni', 'municipio', 'cantidad', 'unidad']
+
+Nulos por columna (antes):
+  fecha                 0
+  cod_depto             0
+  departamento          0
+  cod_muni              0
+  municipio             0
+  cantidad              0
+  unidad                0
+
+Balance:
+  Filas de reporte            :   37,987
+  SUMA de CANTIDAD (unidades) :   70,732
+
+  ATENCION: este dataset trae la columna CANTIDAD. Cada fila es un
+  reporte agregado por municipio y fecha, no un evento individual.
+  Por eso se SUMA CANTIDAD; contar filas daria un numero sin sentido.
+
+  Unidades de medida presentes:
+    UNIDAD                 37,987 filas
+  (una sola unidad => sumar es valido)
+
+==============================================================================
+PASO 3 - PREGUNTA CENTRAL
+==============================================================================
+
+  DEPARTAMENTOS CON MAS DESTRUCCIONES DE INFRAESTRUCTURA
+  DE PRODUCCION DE DROGAS ILICITAS
+
+  Top 10 departamentos
+  ----------------------------------------------------------------------------
+  #  DEPARTAMENTO                  UNIDADES % DEL TOTAL    REPORTES   MUNIC.
+  1  PUTUMAYO                        14,913      21.08%       6,889       10
+  2  NARINO                          14,676      20.75%       5,716       48
+  3  NORTE DE SANTANDER               8,507      12.03%       5,509       34
+  4  CAUCA                            5,397       7.63%       3,776       36
+  5  ANTIOQUIA                        4,686       6.63%       3,289       94
+  6  GUAVIARE                         4,546       6.43%       1,984        4
+  7  CHOCO                            3,433       4.85%       1,741       26
+  8  CAQUETA                          3,340       4.72%       2,105       16
+  9  META                             3,161       4.47%       1,974       21
+  10 BOLIVAR                          2,619       3.70%       1,259       21
+  ----------------------------------------------------------------------------
+  Los 10 primeros concentran 65,278 de 70,732 unidades (92.3%)
+
+==============================================================================
+PASO 4 - CONTROL DE CALIDAD DEL DATO
+==============================================================================
+
+4.1  ¿Cuantos departamentos hay en Colombia?  32
+     El dataset trae 34 valores distintos en DEPARTAMENTO:
+
+4.2  ANOMALIAS DETECTADAS (COD_DEPTO no es un codigo DIVIPOLA de 2 digitos)
+
+     COD_DEPTO   DEPARTAMENTO            UNIDADES   FILAS
+     60401       PERU                          79      11
+     86201       VENEZUELA                     25       6
+     SIN ESTABLE SIN ESTABLECER                 1       1
+
+     Total contaminado: 105 unidades (0.15% del total)
+     'PERU' es un PAIS, no un departamento colombiano.
+     Se excluyen del ranking oficial pero se dejan documentados.
+
+==============================================================================
+PASO 5 - RANKING OFICIAL (solo departamentos válidos)
+==============================================================================
+
+5.1  Ranking completo de departamentos validos
++--------------------+----------+----------+------------+-------+-------+
+| departamento       | unidades | reportes | municipios | desde | hasta |
++--------------------+----------+----------+------------+-------+-------+
+| PUTUMAYO           | 14913.0  | 6889     | 10         | 2010  | 2026  |
+| NARINO             | 14676.0  | 5716     | 48         | 2010  | 2026  |
+| NORTE DE SANTANDER | 8507.0   | 5509     | 34         | 2010  | 2026  |
+| CAUCA              | 5397.0   | 3776     | 36         | 2010  | 2026  |
+| ANTIOQUIA          | 4686.0   | 3289     | 94         | 2010  | 2026  |
+| GUAVIARE           | 4546.0   | 1984     | 4          | 2010  | 2026  |
+| CHOCO              | 3433.0   | 1741     | 26         | 2010  | 2026  |
+| CAQUETA            | 3340.0   | 2105     | 16         | 2010  | 2026  |
+| META               | 3161.0   | 1974     | 21         | 2010  | 2026  |
+| BOLIVAR            | 2619.0   | 1259     | 21         | 2010  | 2026  |
+| VICHADA            | 1509.0   | 839      | 4          | 2010  | 2026  |
+| CORDOBA            | 1212.0   | 836      | 10         | 2010  | 2026  |
+| VALLE DEL CAUCA    | 864.0    | 658      | 17         | 2010  | 2026  |
+| SANTANDER          | 430.0    | 371      | 19         | 2010  | 2026  |
+| BOYACA             | 380.0    | 258      | 21         | 2010  | 2026  |
+| CESAR              | 178.0    | 161      | 19         | 2010  | 2026  |
+| CUNDINAMARCA       | 162.0    | 136      | 48         | 2010  | 2026  |
+| AMAZONAS           | 103.0    | 56       | 7          | 2010  | 2026  |
+| MAGDALENA          | 97.0     | 79       | 4          | 2010  | 2025  |
+| CALDAS             | 77.0     | 56       | 4          | 2010  | 2024  |
++--------------------+----------+----------+------------+-------+-------+
+(20 filas en total)
+
+5.2  LOS TRES MAYORES
+     ----------------------------------------------------
+     1. PUTUMAYO                    14,913 unidades
+     2. NARINO                      14,676 unidades
+     3. NORTE DE SANTANDER           8,507 unidades
+     ----------------------------------------------------
+
+==============================================================================
+PASO 6 - CONTEXTO: SERIE HISTORICA
+==============================================================================
+
+6.1  Destrucciones por ano (todo el pais)
++------+----------+----------+
+| anio | unidades | reportes |
++------+----------+----------+
+| 2010 | 2589.0   | 1386     |
+| 2011 | 2278.0   | 1285     |
+| 2012 | 2440.0   | 1352     |
+| 2013 | 2338.0   | 1372     |
+| 2014 | 2356.0   | 1566     |
+| 2015 | 3842.0   | 2392     |
+| 2016 | 4835.0   | 3077     |
+| 2017 | 4272.0   | 2374     |
+| 2018 | 4578.0   | 2597     |
+| 2019 | 5493.0   | 3022     |
+| 2020 | 5233.0   | 2795     |
+| 2021 | 5762.0   | 3173     |
+| 2022 | 4719.0   | 2425     |
+| 2023 | 5219.0   | 2400     |
+| 2024 | 5252.0   | 2581     |
+| 2025 | 5433.0   | 2516     |
+| 2026 | 3988.0   | 1656     |
++------+----------+----------+
+(17 filas en total)
+
+6.2  Los dos primeros, ano a ano
++------+----------+--------+
+| anio | PUTUMAYO | NARINO |
++------+----------+--------+
+| 2010 | 495.0    | 0.0    |
+| 2011 | 320.0    | 0.0    |
+| 2012 | 241.0    | 0.0    |
+| 2013 | 133.0    | 0.0    |
+| 2014 | 109.0    | 0.0    |
+| 2015 | 439.0    | 0.0    |
+| 2016 | 628.0    | 0.0    |
+| 2017 | 840.0    | 0.0    |
+| 2018 | 1174.0   | 0.0    |
+| 2019 | 988.0    | 0.0    |
+| 2020 | 1282.0   | 0.0    |
+| 2021 | 1045.0   | 0.0    |
+| 2022 | 1416.0   | 0.0    |
+| 2023 | 1207.0   | 0.0    |
+| 2024 | 1590.0   | 0.0    |
+| 2025 | 1686.0   | 0.0    |
+| 2026 | 1320.0   | 0.0    |
++------+----------+--------+
+(17 filas en total)
+
+==============================================================================
+PASO 7 - VISUALIZACION DE LOS RESULTADOS EN BATCH
+==============================================================================
+
+  [PNG] g1_top_departamentos.png                    42.7 KB   <- la respuesta central
+  [PNG] g2_participacion.png                        49.8 KB   <- concentracion territorial
+  [PNG] g3_serie_historica.png                      37.9 KB   <- tendencia nacional
+  [PNG] g4_putumayo_vs_narino.png                   44.8 KB   <- los dos primeros, comparados
+  [PNG] g5_top_municipios.png                       44.6 KB   <- concentracion municipal
+  [PNG] g6_intensidad_departamental.png             39.9 KB   <- mapa de calor en barras
+
+Total de graficos: 6
+
+==============================================================================
+PASO 8 - EVIDENCIA EN CONSOLA (.show)
+==============================================================================
+
+[.show] Ranking de departamentos:
+
+[.show] Destrucciones por ano:
+
+==============================================================================
+METADATOS
+==============================================================================
+Inicio     : 2026-10-16 01:57:42
+Fin        : 2026-10-16 01:57:57
+Duracion   : 14.6 segundos
+Spark      : 3.5.1
+Python     : 3.10.12
+matplotlib : 3.10.9 (backend Agg, headless)
+Java       : 17.0.20.1
+Dataset    : /home/vboxuser/Descargas/DESTRUCCION_DE_INFRAESTRUCTURA_DE_PRODUCCION_DE_DROGAS_ILICITAS_20261015.csv
+Reportes   : 37,987
+Unidades   : 70,732
+
+RESPUESTA: PUTUMAYO (14,913), NARINO (14,676), NORTE DE SANTANDER (8,507)
